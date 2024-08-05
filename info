@@ -1,0 +1,7 @@
+pyCrawler - chromium bot performing various tasks without being flagged as a bot
+
+each task:
+1. load proxy
+2. set chrome-options
+3. initiate webdriver with proxy, custom UA, and chrome options.
+
