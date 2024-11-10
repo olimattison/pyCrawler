@@ -3,32 +3,29 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+import json
 import random
 import time
 
+delay = random.randint(5, 25) / 10  # random delay
+sms_number = "123-456-7890"
+
 first_names = ["Lebron", "Quan", "Sam", "Carl", "Scott", "Loretta", "Stone", "Matt", "Matthew", "Taylor", "Lucy"]
 last_names = ["James", "Smith", "Brown", "Johnson", "Stevenson", "Hernandez", "Garcia", "Martin", "Jones", "Moore"]
-delay = random.randint(5, 35) / 10
+generated_accounts = {}
 
 
 def create_account_info():
+    x = 0
     first_name = first_names[random.randint(0, len(first_names) - 1)]
     last_name = last_names[random.randint(0, len(last_names) - 1)]
     username = f"{first_name}{last_name}{random.randint(100, 99999)}"
+
     return first_name, last_name, username
 
 
-def getIP(driver):  # https://whatismyip.com
-    try:
-        what = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'the-ipv4'))
-        )
-        element = driver.find_element(By.CLASS_NAME, 'the-ipv4')
-        ip_addr = element.text
-        print(f"successfully grabbed ip ({ip_addr})...")
-        return ip_addr
-    except TimeoutException:
-        print(f"(getIP) - Could not get ip address!")
+def get_verification_code():
+    pass
 
 
 def navigate_to_signup(driver):
@@ -187,6 +184,63 @@ def fill_out_signup(driver, password):
         element.click()
     except BaseException as error:
         print(f"(fill_out_signup) - error clicking next(3) button: {error}")
+
+    time.sleep(delay)
+
+    try:  # phone verification input
+        what = WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located(
+                (By.ID, "phoneNumberId"))
+        )
+        element = driver.find_element(By.ID, "phoneNumberId")
+        print("found phone verification input...")
+        element.send_keys(sms_number)
+    except TimeoutException:
+        print("(fill_out_signup) - error could not find phone verification input")
+
+    time.sleep(delay)
+
+    try:  # next btn(4)
+        element = driver.find_element(By.XPATH, '//*[@id="yDmH0d"]/c-wiz/div/div[3]/div/div/div/div/button')
+        print("found next(4) button...")
+        element.click()
+    except BaseException as error:
+        print(f"(fill_out_signup) - error clicking next(4) button: {error}")
+
+    time.sleep(1)
+
+    try:  # phone number used too many times  HANDLE THIS BETTER
+        what = WebDriverWait(driver, 1).until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="yDmH0d"]/c-wiz/div/div[2]/div/div/div[1]/form/span/section/div/div/div[2]/div/div[2]/div[2]/div'))
+        )
+        print("(fill_out_signup) - error phone number used too many times")
+    except TimeoutException:
+        print("phone number accepted")
+
+    # Update account information in accounts.json
+    with open('accounts.json', 'r') as file:
+        data = json.load(file)
+
+    account_information = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "username": username,
+        "verified_with": sms_number}
+
+    data.append(account_information)
+
+    with open('accounts.json', 'w') as file:
+        json.dump(data, file, indent=4)
+
+    print(f"{username} successfully created!")
+
+
+
+
+
+
+
 
 
 

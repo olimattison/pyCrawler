@@ -1,28 +1,22 @@
 """
-pyCrawler V1.002
-  - Started using undetected_chromedriver
-
-
-  TODO:
-    - Add phone number verification
-    - Add support for saving account info
-
+pyCrawler V1.0
+  - Gmail is now requiring QR code verification from a mobile device. No longer maintaining.
 """
 
-import functions
+import gmail_functions as gmail_functions
 import undetected_chromedriver as uc
 import time
 
 
 task_count = 1
-password = "Quintin1942$"
-proxy = "23.146.144.102:12321"  # this proxy returns a different ip for each task during initiation
+password = "Password123"
+proxy = "x.x.x.x:xxxx"  # this proxy returns a different ip for each task during initiation
 
 
 drivers = []
 
 
-def initiate(proxy):
+def initiate(proxy):    
     options = uc.ChromeOptions()
     # options.add_argument("--headless")
     options.add_argument(f"--proxy-server={proxy}")
@@ -33,17 +27,16 @@ def initiate(proxy):
 
 
 def main():
+    print("Welcome to PyCrawler!")
     for i in range(task_count):
         driver = initiate(proxy)
         drivers.append(driver)
 
     for driver in drivers:
-        functions.navigate_to_signup(driver)
+        gmail_functions.navigate_to_signup(driver)
 
     for driver in drivers:
-        functions.fill_out_signup(driver, password)
-
-    time.sleep(3000)
+        gmail_functions.fill_out_signup(driver, password)
 
     for driver in drivers:
         driver.quit()
